@@ -2,7 +2,7 @@ import React from 'react'
 import { AppBar, Toolbar, Typography } from '@mui/material'
 import { TodoLists } from './todos/components/TodoLists'
 
-const MainAppBar = () => {
+const MainAppBar: React.FC = () => {
   return (
     <AppBar position='static' color='primary'>
       <Toolbar>
@@ -14,15 +14,24 @@ const MainAppBar = () => {
   )
 }
 
-const mainWrapperStyle = { display: 'flex', flexDirection: 'column' }
-const centerContentWrapper = { display: 'flex', justifyContent: 'center' }
-const contentWrapperStyle = {
+const mainWrapperStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+const centerContentWrapper: React.CSSProperties = { display: 'flex', justifyContent: 'center' }
+const contentWrapperStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   maxWidth: '80rem',
   flexGrow: 1,
+  padding: '2rem',
 }
-const MainWrapper = ({ children }) => {
+
+interface MainWrapperProps {
+  children: React.ReactNode
+}
+
+const MainWrapper: React.FC<MainWrapperProps> = ({ children }) => {
   return (
     <div style={mainWrapperStyle}>
       <MainAppBar />
@@ -33,10 +42,10 @@ const MainWrapper = ({ children }) => {
   )
 }
 
-const App = () => {
+const App: React.FC = () => {
   return (
     <MainWrapper>
-      <TodoLists style={{ margin: '1rem' }} />
+      <TodoLists />
     </MainWrapper>
   )
 }
