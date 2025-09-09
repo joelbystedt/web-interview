@@ -3,7 +3,9 @@
   "scripts": {
     "lint": "eslint --ext .ts src",
     "start": "ts-node --watch src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -12,8 +14,11 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.3.1",
     "eslint": "^8.57.0",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
