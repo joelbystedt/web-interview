@@ -9,6 +9,7 @@ export const CONFIG = {
   },
   ERROR_MESSAGES: {
     TODO_NOT_FOUND: 'Todo not found',
+    TODO_TEXT_REQUIRED: 'Todo text is required',
     INVALID_INPUT: 'Invalid input provided',
     LIST_NOT_FOUND: 'List not found',
   },
