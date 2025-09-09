@@ -1,14 +1,20 @@
 {
   "type": "module",
   "scripts": {
-    "lint": "eslint --ext .js src",
-    "start": "node --watch src/index.js"
+    "lint": "eslint --ext .ts src",
+    "start": "ts-node --watch src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2"
   },
   "devDependencies": {
-    "eslint": "^8.57.0"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.1",
+    "eslint": "^8.57.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }
