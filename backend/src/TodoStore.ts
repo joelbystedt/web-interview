@@ -1,3 +1,5 @@
+import { CONFIG } from './config.js'
+
 interface Todo {
   id: string
   text: string
@@ -17,12 +19,14 @@ export class TodoStore {
   private todos = new Map<string, Todo>()
   private todoLists = new Map<string, TodoList>()
 
-  // TODO: Add config for content management
   constructor() {
-    this.todoLists.set('default', { id: 'default', name: 'Default List' })
+    this.todoLists.set(CONFIG.DEFAULT_LIST.ID, {
+      id: CONFIG.DEFAULT_LIST.ID,
+      name: CONFIG.DEFAULT_LIST.NAME,
+    })
   }
 
-  createTodo(text: string, listId: string = 'default'): Todo {
+  createTodo(text: string, listId: string = CONFIG.DEFAULT_LIST.ID): Todo {
     const id = crypto.randomUUID()
     const todo: Todo = {
       id,
@@ -36,7 +40,7 @@ export class TodoStore {
     return todo
   }
 
-  getTodos(listId: string = 'default'): Todo[] {
+  getTodos(listId: string = CONFIG.DEFAULT_LIST.ID): Todo[] {
     return Array.from(this.todos.values()).filter((todo) => todo.listId === listId)
   }
 

@@ -1,4 +1,5 @@
 import { TodoStore } from './TodoStore.js'
+import { CONFIG } from './config.js'
 
 describe('TodoStore', () => {
   let store: TodoStore
@@ -14,7 +15,7 @@ describe('TodoStore', () => {
       expect(todo).toMatchObject({
         text: 'Test task',
         completed: false,
-        listId: 'default',
+        listId: CONFIG.DEFAULT_LIST.ID,
       })
       expect(todo.id).toBeDefined()
       expect(todo.createdAt).toBeInstanceOf(Date)
@@ -68,7 +69,7 @@ describe('TodoStore', () => {
         id: todo.id,
         text: 'Updated task',
         completed: true,
-        listId: 'default',
+        listId: CONFIG.DEFAULT_LIST.ID,
       })
       expect(updated!.updatedAt.getTime()).toBeGreaterThan(todo.updatedAt.getTime())
     })

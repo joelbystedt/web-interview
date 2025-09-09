@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
-import { TodoStore } from './TodoStore'
+import { TodoStore } from './TodoStore.js'
+import { CONFIG } from './config.js'
 
 const app = express()
 
@@ -11,6 +12,6 @@ const PORT = 3001
 
 export const todoStore = new TodoStore()
 
-app.get('/', (_req: Request, res: Response) => res.send('Hello World!'))
+app.get('/', (_req: Request, res: Response) => res.send(CONFIG.MESSAGES.HELLO_WORLD))
 
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+app.listen(PORT, () => console.log(`${CONFIG.MESSAGES.SERVER_LISTENING} ${PORT}!`))
