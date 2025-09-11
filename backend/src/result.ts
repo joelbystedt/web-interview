@@ -1,17 +1,18 @@
 export type Result<T> = {
-  success: true
-  data: T
-} | {
-  success: false
-  error: string
+  success: boolean
+  status: number
+  data?: T
+  error?: string
 }
 
 export const ok = <T>(data: T): Result<T> => ({
   success: true,
-  data
+  status: 200,
+  data,
 })
 
-export const err = <T>(error: string): Result<T> => ({
+export const err = <T>(error: string, status: number): Result<T> => ({
   success: false,
-  error
+  status,
+  error,
 })

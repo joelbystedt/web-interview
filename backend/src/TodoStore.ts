@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js'
 import { Result, ok, err } from './result.js'
 
-interface Todo {
+export interface Todo {
   id: string
   text: string
   completed: boolean
@@ -11,7 +11,7 @@ interface Todo {
   dueDate?: Date
 }
 
-interface TodoList {
+export interface TodoList {
   id: string
   name: string
 }
@@ -28,9 +28,7 @@ export class TodoStore {
   }
 
   createTodo(text: string, listId: string = CONFIG.DEFAULT_LIST.ID): Result<Todo> {
-    if (!text) {
-      return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED)
-    }
+    if (!text) return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED, 400)
 
     const id = crypto.randomUUID()
     const todo: Todo = {
@@ -41,41 +39,35 @@ export class TodoStore {
       createdAt: new Date(),
       updatedAt: new Date(),
     }
+
     this.todos.set(id, todo)
     return ok(todo)
   }
 
-  getTodos(listId: string = CONFIG.DEFAULT_LIST.ID): Todo[] {
-    return Array.from(this.todos.values()).filter((todo) => todo.listId === listId)
+  getTodos(listId: string = CONFIG.DEFAULT_LIST.ID): Result<Todo[]> {
+    const todos = Array.from(this.todos.values()).filter((todo) => todo.listId === listId)
+    return ok(todos)
   }
 
   updateTodo(id: string, updates: Partial<Omit<Todo, 'id' | 'createdAt'>>): Result<Todo> {
     const todo = this.todos.get(id)
-    if (!todo) {
-      return err(`${CONFIG.ERROR_MESSAGES.TODO_NOT_FOUND} with id '${id}'`)
-    }
-
-    if (updates.text !== undefined && !updates.text?.trim()) {
-      return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED)
-    }
+    if (!todo) return err(CONFIG.ERROR_MESSAGES.TODO_NOT_FOUND, 404)
+    if (!updates.text) return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED, 400)
 
     const updated: Todo = {
       ...todo,
       ...updates,
-      text: updates.text ? updates.text.trim() : todo.text,
+      text: updates.text.trim(),
       updatedAt: new Date(),
     }
+
     this.todos.set(id, updated)
     return ok(updated)
   }
 
   deleteTodo(id: string): Result<{ deleted: boolean }> {
     const deleted = this.todos.delete(id)
-    if (!deleted) {
-      return err(`${CONFIG.ERROR_MESSAGES.TODO_NOT_FOUND} with id '${id}'`)
-    }
-    return ok({ deleted: true })
+    if (!deleted) return err(CONFIG.ERROR_MESSAGES.TODO_NOT_FOUND, 404)
+    else return ok({ deleted: true })
   }
 }
-
-export type { Todo, TodoList }
