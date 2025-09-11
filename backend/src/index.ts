@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { TodoStore } from './TodoStore.js'
 import { CONFIG } from './config.js'
-import todoRoutes from './todos.js'
+import todoRoutes from './routes.js'
 
 const app = express()
 
