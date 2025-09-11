@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api/todos'
+const API_URL = 'http://localhost:3001/api/todos' // TODO: Update with environment variable
 
 export interface Todo {
   id: string
@@ -7,19 +7,17 @@ export interface Todo {
   listId: string
   createdAt: string
   updatedAt: string
-  dueDate?: string
 }
 
-interface ApiResponse<T> {
+interface Response<T> {
   success: boolean
   data: T
-  count?: number
 }
 
 export const api = {
   async getTodos(): Promise<Todo[]> {
     const response = await fetch(API_URL)
-    const data: ApiResponse<Todo[]> = await response.json()
+    const data: Response<Todo[]> = await response.json()
     return data.data
   },
 
@@ -29,7 +27,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
     })
-    const data: ApiResponse<Todo> = await response.json()
+    const data: Response<Todo> = await response.json()
     return data.data
   },
 
@@ -39,7 +37,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     })
-    const data: ApiResponse<Todo> = await response.json()
+    const data: Response<Todo> = await response.json()
     return data.data
   },
 

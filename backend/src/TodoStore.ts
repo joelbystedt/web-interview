@@ -8,7 +8,6 @@ export interface Todo {
   listId: string
   createdAt: Date
   updatedAt: Date
-  dueDate?: Date
 }
 
 export interface TodoList {
