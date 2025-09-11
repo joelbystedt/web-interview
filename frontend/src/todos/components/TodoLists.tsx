@@ -11,18 +11,17 @@ import {
   Box,
 } from '@mui/material'
 import ReceiptIcon from '@mui/icons-material/Receipt'
-import { api, Todo } from '../../api'
+import { api, TodoList } from '../../api'
 import { TodoListForm } from './TodoListForm'
 
 export const TodoLists: React.FC = () => {
-  const [activeList, setActiveList] = useState<string | null>(null)
-  const [todos, setTodos] = useState<Todo[]>([])
+  const [todoLists, setTodoLists] = useState<TodoList[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     api
-      .getTodos()
-      .then(setTodos)
+      .getTodoLists()
+      .then(setTodoLists)
       .finally(() => setLoading(false))
   }, [])
 
@@ -40,25 +39,57 @@ export const TodoLists: React.FC = () => {
         <CardContent>
           <Typography component='h2'>My Todos</Typography>
           <List>
-            {todos.map((todo) => (
-              <ListItemButton key={todo.id}>
+            {todoLists.map((todoList) => (
+              <ListItemButton 
+                key={todoList.id} 
+                onClick={() => {
+                  setTodoLists(lists => 
+                    lists.map(list => ({ 
+                      ...list, 
+                      active: list.id === todoList.id 
+                    }))
+                  )
+                }}
+                selected={todoList.active}
+              >
                 <ListItemIcon>
                   <ReceiptIcon />
                 </ListItemIcon>
                 <ListItemText
-                  primary={todo.text}
-                  secondary={todo.completed ? 'Completed' : 'Pending'}
+                  primary={todoList.name}
+                  secondary={`${todoList.todos.length} todos`}
                 />
               </ListItemButton>
             ))}
           </List>
-          {todos.length === 0 && <Typography color='textSecondary'>No todos yet</Typography>}
-          <TodoListForm
-            todoList={{ id: '1', title: 'My Todo List', todos: todos.map(todo => todo.text) }}
-            saveTodoList={() => {}}
-          />
+          {todoLists.length === 0 && <Typography color='textSecondary'>No todos yet</Typography>}
         </CardContent>
       </Card>
+      {(() => {
+        const activeList = todoLists.find((list) => list.active)
+        return activeList ? (
+          <TodoListForm
+            key={activeList.id}
+            todoList={activeList}
+            saveTodoList={(id, { todos }) => {
+              setTodoLists(lists =>
+                lists.map(list =>
+                  list.id === id ? { 
+                    ...list, 
+                    todos: todos.map((text, index) => ({
+                      id: list.todos[index]?.id || `temp-${index}`,
+                      text,
+                      completed: list.todos[index]?.completed || false,
+                      createdAt: list.todos[index]?.createdAt || new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                    }))
+                  } : list
+                )
+              )
+            }}
+          />
+        ) : null
+      })()}
     </Fragment>
   )
 }

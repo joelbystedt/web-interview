@@ -2,12 +2,7 @@ import React, { useState } from 'react'
 import { TextField, Card, CardContent, CardActions, Button, Typography } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
-
-interface TodoList {
-  id: string
-  title: string
-  todos: string[]
-}
+import { TodoList } from '../../api'
 
 interface TodoListFormProps {
   todoList: TodoList
@@ -15,7 +10,7 @@ interface TodoListFormProps {
 }
 
 export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, saveTodoList }) => {
-  const [todos, setTodos] = useState(todoList.todos)
+  const [todos, setTodos] = useState(todoList.todos.map(todo => todo.text))
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -25,7 +20,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, saveTodoLi
   return (
     <Card sx={{ margin: '0 1rem' }}>
       <CardContent>
-        <Typography component='h2'>{todoList.title}</Typography>
+        <Typography component='h2'>{todoList.name}</Typography>
         <form
           onSubmit={handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}

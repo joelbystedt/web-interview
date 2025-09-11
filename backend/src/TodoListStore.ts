@@ -14,6 +14,7 @@ export interface TodoList {
   name: string
   createdAt: Date
   updatedAt: Date
+  active: boolean
   todos: Todo[]
 }
 
@@ -27,6 +28,7 @@ export class TodoListStore {
       name: CONFIG.DEFAULT_LIST.NAME,
       createdAt: now,
       updatedAt: now,
+      active: true,
       todos: [],
     })
   }
@@ -42,6 +44,7 @@ export class TodoListStore {
       name: name.trim(),
       createdAt: now,
       updatedAt: now,
+      active: false,
       todos: [],
     }
 
