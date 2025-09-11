@@ -3,10 +3,21 @@ import { TextField, Card, CardContent, CardActions, Button, Typography } from '@
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 
-export const TodoListForm = ({ todoList, saveTodoList }) => {
+interface TodoList {
+  id: string
+  title: string
+  todos: string[]
+}
+
+interface TodoListFormProps {
+  todoList: TodoList
+  saveTodoList: (id: string, data: { todos: string[] }) => void
+}
+
+export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, saveTodoList }) => {
   const [todos, setTodos] = useState(todoList.todos)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     saveTodoList(todoList.id, { todos })
   }
@@ -28,7 +39,7 @@ export const TodoListForm = ({ todoList, saveTodoList }) => {
                 sx={{ flexGrow: 1, marginTop: '1rem' }}
                 label='What to do?'
                 value={name}
-                onChange={(event) => {
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setTodos([
                     // immutable update
                     ...todos.slice(0, index),
