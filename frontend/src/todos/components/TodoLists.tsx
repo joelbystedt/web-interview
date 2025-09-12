@@ -96,7 +96,7 @@ const TodoListsContent: React.FC<{
           </ListItemIcon>
           <ListItemText primary={todoList.name} secondary={`${todoList.todos.length} todos`} />
           <IconButton
-            edge="end"
+            edge='end'
             onClick={async (e) => {
               e.stopPropagation()
               await api.deleteTodoList(todoList.id)
@@ -114,6 +114,20 @@ const TodoListsContent: React.FC<{
 const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
   const activeList = todoLists.find((list) => list.active)
   return activeList ? (
-    <TodoListForm key={activeList.id} todoList={activeList} saveTodoList={() => {}} />
+    <div style={{ marginTop: '1rem' }}>
+      <TodoListForm 
+        key={activeList.id} 
+        todoList={activeList} 
+        saveTodoList={async (id, { todos }) => {
+          // Only save non-empty todos
+          const validTodos = todos.filter(text => text.trim())
+          if (validTodos.length > 0) {
+            for (const text of validTodos) {
+              await api.createTodo(id, text)
+            }
+          }
+        }} 
+      />
+    </div>
   ) : null
 }

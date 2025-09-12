@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { TextField, Card, CardContent, CardActions, Button, Typography } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
@@ -10,21 +10,17 @@ interface TodoListFormProps {
 }
 
 export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, saveTodoList }) => {
-  const [todos, setTodos] = useState(todoList.todos.map(todo => todo.text))
+  const [todos, setTodos] = useState(todoList.todos.map((todo) => todo.text))
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  useEffect(() => {
     saveTodoList(todoList.id, { todos })
-  }
+  }, [todos, todoList.id, saveTodoList])
 
   return (
     <Card sx={{ margin: '0 1rem' }}>
       <CardContent>
         <Typography component='h2'>{todoList.name}</Typography>
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           {todos.map((name, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
               <Typography sx={{ margin: '8px' }} variant='h6'>
@@ -69,11 +65,8 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, saveTodoLi
             >
               Add Todo <AddIcon />
             </Button>
-            <Button type='submit' variant='contained' color='primary'>
-              Save
-            </Button>
           </CardActions>
-        </form>
+        </div>
       </CardContent>
     </Card>
   )
