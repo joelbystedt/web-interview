@@ -17,6 +17,7 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { api, TodoList } from '../../api'
 import { TodoListForm } from './TodoListForm'
+import { TodoListService } from '../services'
 
 export const TodoLists: React.FC = () => {
   const [todoLists, setTodoLists] = useState<TodoList[]>([])
@@ -61,10 +62,7 @@ const TodoListsHeader: React.FC<{
       <Button
         variant='contained'
         startIcon={<AddIcon />}
-        onClick={async () => {
-          const newList = await api.createTodoList(`New List ${todoLists.length + 1}`)
-          setTodoLists([...todoLists, newList])
-        }}
+        onClick={() => TodoListService.createNewTodoList(todoLists, setTodoLists)}
       >
         New List
       </Button>
@@ -81,14 +79,7 @@ const TodoListsContent: React.FC<{
       {todoLists.map((todoList) => (
         <ListItemButton
           key={todoList.id}
-          onClick={() => {
-            setTodoLists((lists) =>
-              lists.map((list) => ({
-                ...list,
-                active: list.id === todoList.id,
-              }))
-            )
-          }}
+          onClick={() => TodoListService.selectTodoList(todoList.id, setTodoLists)}
           selected={todoList.active}
         >
           <ListItemIcon>
@@ -99,8 +90,7 @@ const TodoListsContent: React.FC<{
             edge='end'
             onClick={async (e) => {
               e.stopPropagation()
-              await api.deleteTodoList(todoList.id)
-              setTodoLists((lists) => lists.filter((list) => list.id !== todoList.id))
+              await TodoListService.deleteTodoList(todoList.id, setTodoLists)
             }}
           >
             <DeleteIcon />
@@ -118,15 +108,7 @@ const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
       <TodoListForm 
         key={activeList.id} 
         todoList={activeList} 
-        saveTodoList={async (id, { todos }) => {
-          // Only save non-empty todos
-          const validTodos = todos.filter(text => text.trim())
-          if (validTodos.length > 0) {
-            for (const text of validTodos) {
-              await api.createTodo(id, text)
-            }
-          }
-        }} 
+        saveTodoList={TodoListService.saveTodoList} 
       />
     </div>
   ) : null
