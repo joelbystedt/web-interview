@@ -7,9 +7,10 @@ import { TodoListService } from '../services'
 
 interface TodoListFormProps {
   todoList: TodoList
+  onTodoChange?: (todoList: TodoList) => void
 }
 
-export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
+export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChange }) => {
   const [todos, setTodos] = useState<Todo[]>(todoList.todos)
   const [newTodos, setNewTodos] = useState<string[]>([''])
 
@@ -25,7 +26,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
                 {index + 1}
               </Typography>
               <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem' }}
+                sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
                 label='What to do?'
                 value={todo.text}
                 onChange={(event) => {
@@ -47,17 +48,17 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
                 color='secondary'
                 onClick={async () => {
                   await TodoListService.deleteTodo(todoList.id, todo.id)
-                  setTodos([
-                    ...todos.slice(0, index),
-                    ...todos.slice(index + 1),
-                  ])
+                  const updatedTodos = [...todos.slice(0, index), ...todos.slice(index + 1)]
+                  setTodos(updatedTodos)
+                  // Update parent with new todo count
+                  onTodoChange?.({ ...todoList, todos: updatedTodos })
                 }}
               >
                 <DeleteIcon />
               </Button>
             </div>
           ))}
-          
+
           {/* New todos */}
           {newTodos.map((text, index) => (
             <div key={`new-${index}`} style={{ display: 'flex', alignItems: 'center' }}>
@@ -65,7 +66,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
                 {todos.length + index + 1}
               </Typography>
               <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem' }}
+                sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
                 label='What to do?'
                 value={text}
                 onChange={(event) => {
@@ -78,14 +79,17 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
                 onBlur={async () => {
                   if (text.trim()) {
                     const newTodo = await TodoListService.createTodo(todoList.id, text)
-                    setTodos([...todos, newTodo])
+                    const updatedTodos = [...todos, newTodo]
+                    setTodos(updatedTodos)
+                    // Update parent with new todo count
+                    onTodoChange?.({ ...todoList, todos: updatedTodos })
                     // Remove this new todo from newTodos array
                     const updatedNewTodos = [
                       ...newTodos.slice(0, index),
                       ...newTodos.slice(index + 1),
                     ]
                     // If this was the last todo and it's now empty, add a new empty one
-                    if (updatedNewTodos.length === 0 || (index === newTodos.length - 1)) {
+                    if (updatedNewTodos.length === 0 || index === newTodos.length - 1) {
                       setNewTodos([...updatedNewTodos, ''])
                     } else {
                       setNewTodos(updatedNewTodos)
@@ -93,19 +97,18 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList }) => {
                   }
                 }}
               />
-              <Button
-                sx={{ margin: '8px' }}
-                size='small'
-                color='secondary'
-                onClick={() => {
-                  setNewTodos([
-                    ...newTodos.slice(0, index),
-                    ...newTodos.slice(index + 1),
-                  ])
-                }}
-              >
-                <DeleteIcon />
-              </Button>
+              {text.trim() && (
+                <Button
+                  sx={{ margin: '8px' }}
+                  size='small'
+                  color='secondary'
+                  onClick={() => {
+                    setNewTodos([...newTodos.slice(0, index), ...newTodos.slice(index + 1)])
+                  }}
+                >
+                  <DeleteIcon />
+                </Button>
+              )}
             </div>
           ))}
 

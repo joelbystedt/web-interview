@@ -46,7 +46,7 @@ export const TodoLists: React.FC = () => {
           <TodoListsContent todoLists={todoLists} setTodoLists={setTodoLists} />
         </CardContent>
       </Card>
-      <TodoListActive todoLists={todoLists} />
+      <TodoListActive todoLists={todoLists} setTodoLists={setTodoLists} />
     </Fragment>
   )
 }
@@ -100,11 +100,27 @@ const TodoListsContent: React.FC<{
   )
 }
 
-const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
+const TodoListActive: React.FC<{ 
+  todoLists: TodoList[]
+  setTodoLists: React.Dispatch<React.SetStateAction<TodoList[]>>
+}> = ({ todoLists, setTodoLists }) => {
   const activeList = todoLists.find((list) => list.active)
+  
+  const handleTodoChange = (updatedTodoList: TodoList) => {
+    setTodoLists(lists => 
+      lists.map(list => 
+        list.id === updatedTodoList.id ? updatedTodoList : list
+      )
+    )
+  }
+  
   return activeList ? (
     <div style={{ marginTop: '1rem' }}>
-      <TodoListForm key={activeList.id} todoList={activeList} />
+      <TodoListForm 
+        key={activeList.id} 
+        todoList={activeList}
+        onTodoChange={handleTodoChange}
+      />
     </div>
   ) : null
 }
