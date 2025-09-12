@@ -21,19 +21,6 @@ export interface TodoList {
 export class TodoListStore {
   private todoLists = new Map<string, TodoList>()
 
-  constructor() {
-    const now = new Date()
-    this.todoLists.set(CONFIG.DEFAULT_LIST.ID, {
-      id: CONFIG.DEFAULT_LIST.ID,
-      name: CONFIG.DEFAULT_LIST.NAME,
-      createdAt: now,
-      updatedAt: now,
-      active: true,
-      todos: [],
-    })
-  }
-
-  // TodoList methods
   createTodoList(name: string): Result<TodoList> {
     if (!name) return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED, 400)
 
@@ -79,17 +66,12 @@ export class TodoListStore {
   }
 
   deleteTodoList(id: string): Result<{ deleted: boolean }> {
-    if (id === CONFIG.DEFAULT_LIST.ID) {
-      return err('Cannot delete default list', 400)
-    }
-
     const deleted = this.todoLists.delete(id)
     if (!deleted) return err(CONFIG.ERROR_MESSAGES.LIST_NOT_FOUND, 404)
     return ok({ deleted: true })
   }
 
-  // Todo methods
-  createTodo(text: string, listId: string = CONFIG.DEFAULT_LIST.ID): Result<Todo> {
+  createTodo(text: string, listId: string): Result<Todo> {
     if (!text) return err(CONFIG.ERROR_MESSAGES.TODO_TEXT_REQUIRED, 400)
 
     const list = this.todoLists.get(listId)

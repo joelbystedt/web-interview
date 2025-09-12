@@ -44,7 +44,6 @@ export const TodoLists: React.FC = () => {
         <CardContent>
           <TodoListsHeader todoLists={todoLists} setTodoLists={setTodoLists} />
           <TodoListsContent todoLists={todoLists} setTodoLists={setTodoLists} />
-          {/* {todoLists.length === 0 && <Typography color='textSecondary'>No todos yet</Typography>} */}
         </CardContent>
       </Card>
       <TodoListActive todoLists={todoLists} />
@@ -105,10 +104,7 @@ const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
   const activeList = todoLists.find((list) => list.active)
   return activeList ? (
     <div style={{ marginTop: '1rem' }}>
-      <TodoListForm 
-        key={activeList.id} 
-        todoList={activeList} 
-      />
+      <TodoListForm key={activeList.id} todoList={activeList} />
     </div>
   ) : null
 }
