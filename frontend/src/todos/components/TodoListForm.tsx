@@ -10,9 +10,91 @@ interface TodoListFormProps {
   onTodoChange?: (todoList: TodoList) => void
 }
 
+const TodoRow: React.FC<{
+  number: number
+  value: string
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onSave: () => Promise<void> | void
+  onDelete: () => Promise<void> | void
+  showDelete?: boolean
+}> = ({ number, value, onChange, onSave, onDelete, showDelete = true }) => {
+  const [isFocused, setIsFocused] = useState(false)
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Typography sx={{ margin: '8px' }} variant='h6'>
+        {number}
+      </Typography>
+      <TextField
+        sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
+        label='What to do?'
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={async () => {
+          setIsFocused(false)
+          await onSave()
+        }}
+        onKeyDown={async (event) => {
+          if (event.key === 'Enter') {
+            event.currentTarget.blur()
+            await onSave()
+          }
+        }}
+      />
+      {showDelete && (
+        <Button 
+          sx={{ margin: '8px' }} 
+          size='small' 
+          color='secondary' 
+          disabled={isFocused}
+          onClick={onDelete}
+        >
+          <DeleteIcon />
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChange }) => {
   const [todos, setTodos] = useState<Todo[]>(todoList.todos)
   const [newTodos, setNewTodos] = useState<string[]>([''])
+
+  const updateParent = (updatedTodos: Todo[]) => {
+    onTodoChange?.({ ...todoList, todos: updatedTodos })
+  }
+
+  const createNewTodo = async (text: string, index: number) => {
+    const newTodo = await TodoListService.createTodo(todoList.id, text)
+    const updatedTodos = [...todos, newTodo]
+    setTodos(updatedTodos)
+    updateParent(updatedTodos)
+
+    const updatedNewTodos = [...newTodos.slice(0, index), ...newTodos.slice(index + 1)]
+    if (updatedNewTodos.length === 0 || index === newTodos.length - 1) {
+      setNewTodos([...updatedNewTodos, ''])
+    } else {
+      setNewTodos(updatedNewTodos)
+    }
+  }
+
+  const updateExistingTodo = async (todoId: string, text: string) => {
+    if (text.trim()) {
+      await TodoListService.updateTodo(todoList.id, todoId, text)
+    }
+  }
+
+  const deleteExistingTodo = async (todoId: string, index: number) => {
+    const todo = todos[index]
+    if (todo.text.trim()) {
+      await TodoListService.updateTodo(todoList.id, todoId, todo.text)
+    }
+    await TodoListService.deleteTodo(todoList.id, todoId)
+    const updatedTodos = [...todos.slice(0, index), ...todos.slice(index + 1)]
+    setTodos(updatedTodos)
+    updateParent(updatedTodos)
+  }
 
   return (
     <Card sx={{ margin: '0 1rem' }}>
@@ -21,119 +103,48 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
         <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           {/* Existing todos */}
           {todos.map((todo, index) => (
-            <div key={todo.id} style={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ margin: '8px' }} variant='h6'>
-                {index + 1}
-              </Typography>
-              <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
-                label='What to do?'
-                value={todo.text}
-                onChange={(event) => {
-                  setTodos([
-                    ...todos.slice(0, index),
-                    { ...todo, text: event.target.value },
-                    ...todos.slice(index + 1),
-                  ])
-                }}
-                onKeyDown={async (event) => {
-                  if (event.key === 'Enter') {
-                    event.currentTarget.blur()
-                    if (todo.text.trim()) {
-                      await TodoListService.updateTodo(todoList.id, todo.id, todo.text)
-                    }
-                  }
-                }}
-                onBlur={async () => {
-                  if (todo.text.trim()) {
-                    await TodoListService.updateTodo(todoList.id, todo.id, todo.text)
-                  }
-                }}
-              />
-              <Button
-                sx={{ margin: '8px' }}
-                size='small'
-                color='secondary'
-                onClick={async () => {
-                  // Save any pending changes first
-                  if (todo.text.trim()) {
-                    await TodoListService.updateTodo(todoList.id, todo.id, todo.text)
-                  }
-                  // Then delete
-                  await TodoListService.deleteTodo(todoList.id, todo.id)
-                  const updatedTodos = [...todos.slice(0, index), ...todos.slice(index + 1)]
-                  setTodos(updatedTodos)
-                  // Update parent with new todo count
-                  onTodoChange?.({ ...todoList, todos: updatedTodos })
-                }}
-              >
-                <DeleteIcon />
-              </Button>
-            </div>
+            <TodoRow
+              key={todo.id}
+              number={index + 1}
+              value={todo.text}
+              onChange={(event) => {
+                setTodos([
+                  ...todos.slice(0, index),
+                  { ...todo, text: event.target.value },
+                  ...todos.slice(index + 1),
+                ])
+              }}
+              onSave={() => updateExistingTodo(todo.id, todo.text)}
+              onDelete={() => deleteExistingTodo(todo.id, index)}
+            />
           ))}
 
           {/* New todos */}
           {newTodos.map((text, index) => (
-            <div key={`new-${index}`} style={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ margin: '8px' }} variant='h6'>
-                {todos.length + index + 1}
-              </Typography>
-              <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
-                label='What to do?'
-                value={text}
-                onChange={(event) => {
-                  setNewTodos([
-                    ...newTodos.slice(0, index),
-                    event.target.value,
-                    ...newTodos.slice(index + 1),
-                  ])
-                }}
-                onKeyDown={async (event) => {
-                  if (event.key === 'Enter') {
-                    event.currentTarget.blur()
-                    if (text.trim()) {
-                      const newTodo = await TodoListService.createTodo(todoList.id, text)
-                      const updatedTodos = [...todos, newTodo]
-                      setTodos(updatedTodos)
-                      // Update parent with new todo count
-                      onTodoChange?.({ ...todoList, todos: updatedTodos })
-                      // Remove this new todo from newTodos array
-                      const updatedNewTodos = [
-                        ...newTodos.slice(0, index),
-                        ...newTodos.slice(index + 1),
-                      ]
-                      // If this was the last todo and it's now empty, add a new empty one
-                      if (updatedNewTodos.length === 0 || index === newTodos.length - 1) {
-                        setNewTodos([...updatedNewTodos, ''])
-                      } else {
-                        setNewTodos(updatedNewTodos)
-                      }
-                    }
-                  }
-                }}
-                onBlur={async () => {
-                  if (text.trim()) {
-                    const newTodo = await TodoListService.createTodo(todoList.id, text)
-                    const updatedTodos = [...todos, newTodo]
-                    setTodos(updatedTodos)
-                    // Update parent with new todo count
-                    onTodoChange?.({ ...todoList, todos: updatedTodos })
-                    // Remove this new todo from newTodos array
-                    const updatedNewTodos = [
-                      ...newTodos.slice(0, index),
-                      ...newTodos.slice(index + 1),
-                    ]
-                    // If this was the last todo and it's now empty, add a new empty one
-                    if (updatedNewTodos.length === 0 || index === newTodos.length - 1) {
-                      setNewTodos([...updatedNewTodos, ''])
-                    } else {
-                      setNewTodos(updatedNewTodos)
-                    }
-                  }
-                }}
-              />
-            </div>
+            <TodoRow
+              key={`new-${index}`}
+              number={todos.length + index + 1}
+              value={text}
+              onChange={(event) => {
+                setNewTodos([
+                  ...newTodos.slice(0, index),
+                  event.target.value,
+                  ...newTodos.slice(index + 1),
+                ])
+              }}
+              onSave={() => {
+                if (text.trim()) {
+                  return createNewTodo(text, index)
+                }
+              }}
+              onDelete={async () => {
+                if (text.trim()) {
+                  await createNewTodo(text, index)
+                } else {
+                  setNewTodos([...newTodos.slice(0, index), ...newTodos.slice(index + 1)])
+                }
+              }}
+            />
           ))}
 
           <CardActions>
