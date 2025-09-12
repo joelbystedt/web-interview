@@ -24,8 +24,7 @@ export const TodoLists: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    TodoListService
-      .getTodoLists()
+    TodoListService.getTodoLists()
       .then(setTodoLists)
       .finally(() => setLoading(false))
   }, [])

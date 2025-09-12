@@ -2,15 +2,14 @@ describe('Todo CRUD Operations', () => {
   it('should create, update and delete todos', () => {
     const listName = `CRUD Test ${Date.now()}`
     let listId, todoId
-    
-    // Create a list
+
     cy.request('POST', '/api/lists', { name: listName })
       .should((response) => {
         expect(response.status).to.eq(201)
         listId = response.body.data.id
       })
       .then(() => {
-        // Create a new todo (onBlur behavior)
+        // Create a new todo
         return cy.request('POST', `/api/lists/${listId}/todos`, { text: 'New Todo' })
       })
       .should((response) => {

@@ -1,8 +1,4 @@
 export const CONFIG = {
-  DEFAULT_LIST: {
-    ID: 'default',
-    NAME: 'Default List',
-  },
   MESSAGES: {
     HELLO_WORLD: 'Hello World!',
     SERVER_LISTENING: 'Example app listening on port',
@@ -13,11 +9,6 @@ export const CONFIG = {
     TODO_TEXT_REQUIRED: 'Todo text is required',
     INVALID_INPUT: 'Invalid input provided',
     LIST_NOT_FOUND: 'List not found',
-  },
-  VALIDATION: {
-    MIN_TEXT_LENGTH: 1,
-    MAX_TEXT_LENGTH: 500,
-    MAX_TODOS_PER_LIST: 1000,
   },
 }
 

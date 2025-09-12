@@ -2,7 +2,7 @@ describe('Delete Lists', () => {
   it('should delete a todo list', () => {
     const listName = `Test List to Delete ${Date.now()}`
     let listId
-    
+
     // First create a list to delete
     cy.request('POST', '/api/lists', { name: listName })
       .should((response) => {
@@ -24,7 +24,7 @@ describe('Delete Lists', () => {
         return cy.request({
           method: 'GET',
           url: `/api/lists/${listId}`,
-          failOnStatusCode: false
+          failOnStatusCode: false,
         })
       })
       .should((response) => {

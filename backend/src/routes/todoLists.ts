@@ -4,7 +4,7 @@ import { todoListStore } from '../index.js'
 const router = express.Router()
 
 // GET /api/lists - Get all todo lists
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   const result = todoListStore.getTodoLists()
   const { success, data } = result
 
@@ -17,7 +17,7 @@ router.get('/', (req: Request, res: Response) => {
 // GET /api/lists/:id - Get specific todo list with todos
 router.get('/:id', (req: Request, res: Response) => {
   const { id } = req.params
-  
+
   const result = todoListStore.getTodoList(id)
   const { success, status, data, error } = result
 
