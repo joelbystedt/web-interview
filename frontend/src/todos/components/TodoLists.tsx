@@ -15,7 +15,7 @@ import {
 import ReceiptIcon from '@mui/icons-material/Receipt'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { api, TodoList } from '../../api'
+import { TodoList } from '../../api'
 import { TodoListForm } from './TodoListForm'
 import { TodoListService } from '../services'
 
@@ -24,19 +24,13 @@ export const TodoLists: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    api
+    TodoListService
       .getTodoLists()
       .then(setTodoLists)
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <Box display='flex' justifyContent='center' p={4}>
-        <CircularProgress />
-      </Box>
-    )
-  }
+  if (loading) return <Loading />
 
   return (
     <Fragment>
@@ -100,27 +94,29 @@ const TodoListsContent: React.FC<{
   )
 }
 
-const TodoListActive: React.FC<{ 
+const TodoListActive: React.FC<{
   todoLists: TodoList[]
   setTodoLists: React.Dispatch<React.SetStateAction<TodoList[]>>
 }> = ({ todoLists, setTodoLists }) => {
   const activeList = todoLists.find((list) => list.active)
-  
+
   const handleTodoChange = (updatedTodoList: TodoList) => {
-    setTodoLists(lists => 
-      lists.map(list => 
-        list.id === updatedTodoList.id ? updatedTodoList : list
-      )
+    setTodoLists((lists) =>
+      lists.map((list) => (list.id === updatedTodoList.id ? updatedTodoList : list))
     )
   }
-  
+
   return activeList ? (
     <div style={{ marginTop: '1rem' }}>
-      <TodoListForm 
-        key={activeList.id} 
-        todoList={activeList}
-        onTodoChange={handleTodoChange}
-      />
+      <TodoListForm key={activeList.id} todoList={activeList} onTodoChange={handleTodoChange} />
     </div>
   ) : null
+}
+
+const Loading = () => {
+  return (
+    <Box display='flex' justifyContent='center' p={4}>
+      <CircularProgress />
+    </Box>
+  )
 }

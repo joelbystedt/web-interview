@@ -1,6 +1,10 @@
 import { api, TodoList } from '../api'
 
 export class TodoListService {
+  static async getTodoLists() {
+    return await api.getTodoLists()
+  }
+
   static async createNewTodoList(
     todoLists: TodoList[],
     setTodoLists: React.Dispatch<React.SetStateAction<TodoList[]>>
