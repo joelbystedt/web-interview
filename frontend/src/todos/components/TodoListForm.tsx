@@ -1,5 +1,14 @@
 import React, { useState } from 'react'
-import { TextField, Card, CardContent, CardActions, Button, Typography } from '@mui/material'
+import {
+  TextField,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Typography,
+  Checkbox,
+  IconButton,
+} from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { TodoList, Todo } from '../../api'
@@ -11,23 +20,34 @@ interface TodoListFormProps {
 }
 
 const TodoRow: React.FC<{
-  number: number
+  completed: boolean
   value: string
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onToggleComplete: () => void
   onSave: () => Promise<void> | void
   onDelete: () => Promise<void> | void
-}> = ({ number, value, onChange, onSave, onDelete }) => {
+}> = ({ completed, value, onChange, onToggleComplete, onSave, onDelete }) => {
   const [isFocused, setIsFocused] = useState(false)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Typography sx={{ margin: '8px' }} variant='h6'>
-        {number}
-      </Typography>
+      <Checkbox
+        sx={{
+          margin: '8px',
+          color: 'green',
+          '&.Mui-checked': {
+            color: 'green',
+          },
+        }}
+        checked={completed}
+        disabled={isFocused}
+        onChange={onToggleComplete}
+      />
       <TextField
         sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
-        label='What to do?'
+        size="small"
         value={value}
+        disabled={completed}
         onChange={onChange}
         onFocus={() => setIsFocused(true)}
         onBlur={async () => {
@@ -42,15 +62,9 @@ const TodoRow: React.FC<{
         }}
       />
 
-      <Button
-        sx={{ margin: '8px' }}
-        size='small'
-        color='secondary'
-        disabled={isFocused}
-        onClick={onDelete}
-      >
+      <IconButton sx={{ margin: '8px' }} size='small' disabled={isFocused} onClick={onDelete}>
         <DeleteIcon />
-      </Button>
+      </IconButton>
     </div>
   )
 }
@@ -103,12 +117,19 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
           {todos.map((todo, index) => (
             <TodoRow
               key={todo.id}
-              number={index + 1}
+              completed={todo.completed}
               value={todo.text}
               onChange={(event) => {
                 setTodos([
                   ...todos.slice(0, index),
                   { ...todo, text: event.target.value },
+                  ...todos.slice(index + 1),
+                ])
+              }}
+              onToggleComplete={() => {
+                setTodos([
+                  ...todos.slice(0, index),
+                  { ...todo, completed: !todo.completed },
                   ...todos.slice(index + 1),
                 ])
               }}
@@ -121,7 +142,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
           {newTodos.map((text, index) => (
             <TodoRow
               key={`new-${index}`}
-              number={todos.length + index + 1}
+              completed={false}
               value={text}
               onChange={(event) => {
                 setNewTodos([
@@ -130,6 +151,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
                   ...newTodos.slice(index + 1),
                 ])
               }}
+              onToggleComplete={() => {}}
               onSave={() => {
                 if (text.trim()) {
                   return createNewTodo(text, index)
