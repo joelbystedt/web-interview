@@ -16,8 +16,7 @@ const TodoRow: React.FC<{
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   onSave: () => Promise<void> | void
   onDelete: () => Promise<void> | void
-  showDelete?: boolean
-}> = ({ number, value, onChange, onSave, onDelete, showDelete = true }) => {
+}> = ({ number, value, onChange, onSave, onDelete }) => {
   const [isFocused, setIsFocused] = useState(false)
 
   return (
@@ -42,17 +41,16 @@ const TodoRow: React.FC<{
           }
         }}
       />
-      {showDelete && (
-        <Button 
-          sx={{ margin: '8px' }} 
-          size='small' 
-          color='secondary' 
-          disabled={isFocused}
-          onClick={onDelete}
-        >
-          <DeleteIcon />
-        </Button>
-      )}
+
+      <Button
+        sx={{ margin: '8px' }}
+        size='small'
+        color='secondary'
+        disabled={isFocused}
+        onClick={onDelete}
+      >
+        <DeleteIcon />
+      </Button>
     </div>
   )
 }
