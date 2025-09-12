@@ -39,52 +39,69 @@ export const TodoLists: React.FC = () => {
     <Fragment>
       <Card>
         <CardContent>
-          <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-            <Typography component='h2'>My Todos</Typography>
-            <Button
-              variant='contained'
-              startIcon={<AddIcon />}
-              onClick={async () => {
-                const newList = await api.createTodoList(`New List ${todoLists.length + 1}`)
-                setTodoLists([...todoLists, newList])
-              }}
-            >
-              New List
-            </Button>
-          </Box>
-          <List>
-            {todoLists.map((todoList) => (
-              <ListItemButton
-                key={todoList.id}
-                onClick={() => {
-                  setTodoLists((lists) =>
-                    lists.map((list) => ({
-                      ...list,
-                      active: list.id === todoList.id,
-                    }))
-                  )
-                }}
-                selected={todoList.active}
-              >
-                <ListItemIcon>
-                  <ReceiptIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={todoList.name}
-                  secondary={`${todoList.todos.length} todos`}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-          {todoLists.length === 0 && <Typography color='textSecondary'>No todos yet</Typography>}
+          <TodoListsHeader todoLists={todoLists} setTodoLists={setTodoLists} />
+          <TodoListsContent todoLists={todoLists} setTodoLists={setTodoLists} />
+          {/* {todoLists.length === 0 && <Typography color='textSecondary'>No todos yet</Typography>} */}
         </CardContent>
       </Card>
-      {(() => {
-        const activeList = todoLists.find((list) => list.active)
-        return activeList ? (
-          <TodoListForm key={activeList.id} todoList={activeList} saveTodoList={() => {}} />
-        ) : null
-      })()}
+      <TodoListActive todoLists={todoLists} />
     </Fragment>
   )
+}
+
+const TodoListsHeader: React.FC<{
+  todoLists: TodoList[]
+  setTodoLists: React.Dispatch<React.SetStateAction<TodoList[]>>
+}> = ({ todoLists, setTodoLists }) => {
+  return (
+    <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
+      <Typography component='h2'>My Todos</Typography>
+      <Button
+        variant='contained'
+        startIcon={<AddIcon />}
+        onClick={async () => {
+          const newList = await api.createTodoList(`New List ${todoLists.length + 1}`)
+          setTodoLists([...todoLists, newList])
+        }}
+      >
+        New List
+      </Button>
+    </Box>
+  )
+}
+
+const TodoListsContent: React.FC<{
+  todoLists: TodoList[]
+  setTodoLists: React.Dispatch<React.SetStateAction<TodoList[]>>
+}> = ({ todoLists, setTodoLists }) => {
+  return (
+    <List>
+      {todoLists.map((todoList) => (
+        <ListItemButton
+          key={todoList.id}
+          onClick={() => {
+            setTodoLists((lists) =>
+              lists.map((list) => ({
+                ...list,
+                active: list.id === todoList.id,
+              }))
+            )
+          }}
+          selected={todoList.active}
+        >
+          <ListItemIcon>
+            <ReceiptIcon />
+          </ListItemIcon>
+          <ListItemText primary={todoList.name} secondary={`${todoList.todos.length} todos`} />
+        </ListItemButton>
+      ))}
+    </List>
+  )
+}
+
+const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
+  const activeList = todoLists.find((list) => list.active)
+  return activeList ? (
+    <TodoListForm key={activeList.id} todoList={activeList} saveTodoList={() => {}} />
+  ) : null
 }
