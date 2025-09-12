@@ -16,57 +16,7 @@ import { TodoListService } from '../services'
 
 interface TodoListFormProps {
   todoList: TodoList
-  onTodoChange?: (todoList: TodoList) => void
-}
-
-const TodoRow: React.FC<{
-  completed: boolean
-  value: string
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onToggleComplete: () => void
-  onSave: () => Promise<void> | void
-  onDelete: () => Promise<void> | void
-}> = ({ completed, value, onChange, onToggleComplete, onSave, onDelete }) => {
-  const [isFocused, setIsFocused] = useState(false)
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Checkbox
-        sx={{
-          margin: '8px',
-          color: 'green',
-          '&.Mui-checked': {
-            color: 'green',
-          },
-        }}
-        checked={completed}
-        disabled={isFocused}
-        onChange={onToggleComplete}
-      />
-      <TextField
-        sx={{ flexGrow: 1, marginTop: '1rem', maxWidth: '600px' }}
-        size="small"
-        value={value}
-        disabled={completed}
-        onChange={onChange}
-        onFocus={() => setIsFocused(true)}
-        onBlur={async () => {
-          setIsFocused(false)
-          await onSave()
-        }}
-        onKeyDown={async (event) => {
-          if (event.key === 'Enter') {
-            event.currentTarget.blur()
-            await onSave()
-          }
-        }}
-      />
-
-      <IconButton sx={{ margin: '8px' }} size='small' disabled={isFocused} onClick={onDelete}>
-        <DeleteIcon />
-      </IconButton>
-    </div>
-  )
+  onTodoChange: (todoList: TodoList) => void
 }
 
 export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChange }) => {
@@ -74,7 +24,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
   const [newTodos, setNewTodos] = useState<string[]>([''])
 
   const updateParent = (updatedTodos: Todo[]) => {
-    onTodoChange?.({ ...todoList, todos: updatedTodos })
+    onTodoChange({ ...todoList, todos: updatedTodos })
   }
 
   const createNewTodo = async (text: string, index: number) => {
@@ -98,10 +48,6 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
   }
 
   const deleteExistingTodo = async (todoId: string, index: number) => {
-    const todo = todos[index]
-    if (todo.text.trim()) {
-      await TodoListService.updateTodo(todoList.id, todoId, todo.text)
-    }
     await TodoListService.deleteTodo(todoList.id, todoId)
     const updatedTodos = [...todos.slice(0, index), ...todos.slice(index + 1)]
     setTodos(updatedTodos)
@@ -113,7 +59,6 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
       <CardContent>
         <Typography component='h2'>{todoList.name}</Typography>
         <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-          {/* Existing todos */}
           {todos.map((todo, index) => (
             <TodoRow
               key={todo.id}
@@ -138,7 +83,6 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
             />
           ))}
 
-          {/* New todos */}
           {newTodos.map((text, index) => (
             <TodoRow
               key={`new-${index}`}
@@ -167,19 +111,74 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
             />
           ))}
 
-          <CardActions>
-            <Button
-              type='button'
-              color='primary'
-              onClick={() => {
-                setNewTodos([...newTodos, ''])
-              }}
-            >
-              Add Todo <AddIcon />
-            </Button>
-          </CardActions>
+          <AddTodoButton
+            onClick={() => {
+              setNewTodos([...newTodos, ''])
+            }}
+          />
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+const TodoRow: React.FC<{
+  completed: boolean
+  value: string
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onToggleComplete: () => void
+  onSave: () => Promise<void> | void
+  onDelete: () => Promise<void> | void
+}> = ({ completed, value, onChange, onToggleComplete, onSave, onDelete }) => {
+  const [isFocused, setIsFocused] = useState(false)
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Checkbox
+        sx={{
+          margin: '8px',
+
+          color: 'gray',
+          '&.Mui-checked': {
+            color: 'green',
+          },
+        }}
+        checked={completed}
+        disabled={isFocused}
+        onChange={onToggleComplete}
+      />
+      <TextField
+        sx={{ flexGrow: 1, margin: '1rem', marginLeft: '0', marginRight: '0', maxWidth: '600px' }}
+        size='small'
+        value={value}
+        disabled={completed}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={async () => {
+          setIsFocused(false)
+          await onSave()
+        }}
+        onKeyDown={async (event) => {
+          if (event.key === 'Enter') {
+            event.currentTarget.blur()
+            await onSave()
+          }
+        }}
+      />
+
+      <IconButton sx={{ margin: '8px' }} size='small' disabled={isFocused} onClick={onDelete}>
+        <DeleteIcon />
+      </IconButton>
+    </div>
+  )
+}
+
+const AddTodoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  return (
+    <CardActions>
+      <Button type='button' color='primary' onClick={onClick}>
+        Add Todo <AddIcon />
+      </Button>
+    </CardActions>
   )
 }
