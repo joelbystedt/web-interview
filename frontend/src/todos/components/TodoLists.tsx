@@ -10,9 +10,11 @@ import {
   CircularProgress,
   Box,
   Button,
+  IconButton,
 } from '@mui/material'
 import ReceiptIcon from '@mui/icons-material/Receipt'
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { api, TodoList } from '../../api'
 import { TodoListForm } from './TodoListForm'
 
@@ -93,6 +95,16 @@ const TodoListsContent: React.FC<{
             <ReceiptIcon />
           </ListItemIcon>
           <ListItemText primary={todoList.name} secondary={`${todoList.todos.length} todos`} />
+          <IconButton
+            edge="end"
+            onClick={async (e) => {
+              e.stopPropagation()
+              await api.deleteTodoList(todoList.id)
+              setTodoLists((lists) => lists.filter((list) => list.id !== todoList.id))
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
         </ListItemButton>
       ))}
     </List>
