@@ -27,31 +27,43 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
     onTodoChange({ ...todoList, todos: updatedTodos })
   }
 
+  const updateTodoAt = (index: number, updater: (t: Todo) => Todo) => {
+    setTodos((prev) => {
+      const updated = prev.map((t, i) => (i === index ? updater(t) : t))
+      updateParent(updated)
+      return updated
+    })
+  }
+
+  const removeTodoAt = (index: number) => {
+    setTodos((prev) => {
+      const updated = prev.filter((_, i) => i !== index)
+      updateParent(updated)
+      return updated
+    })
+  }
+
   const createNewTodo = async (text: string, index: number) => {
     const newTodo = await TodoListService.createTodo(todoList.id, text)
-    const updatedTodos = [...todos, newTodo]
-    setTodos(updatedTodos)
-    updateParent(updatedTodos)
+    setTodos((prev) => {
+      const updated = [...prev, newTodo]
+      updateParent(updated)
+      return updated
+    })
 
-    const updatedNewTodos = [...newTodos.slice(0, index), ...newTodos.slice(index + 1)]
-    if (updatedNewTodos.length === 0 || index === newTodos.length - 1) {
-      setNewTodos([...updatedNewTodos, ''])
-    } else {
-      setNewTodos(updatedNewTodos)
-    }
+    setNewTodos((prev) => {
+      const updated = [...prev.slice(0, index), ...prev.slice(index + 1)]
+      return updated.length === 0 || index === prev.length - 1 ? [...updated, ''] : updated
+    })
   }
 
   const updateExistingTodo = async (todoId: string, text: string) => {
-    if (text.trim()) {
-      await TodoListService.updateTodo(todoList.id, todoId, text)
-    }
+    await TodoListService.updateTodo(todoList.id, todoId, text)
   }
 
   const deleteExistingTodo = async (todoId: string, index: number) => {
     await TodoListService.deleteTodo(todoList.id, todoId)
-    const updatedTodos = [...todos.slice(0, index), ...todos.slice(index + 1)]
-    setTodos(updatedTodos)
-    updateParent(updatedTodos)
+    removeTodoAt(index)
   }
 
   return (
@@ -64,22 +76,12 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
               key={todo.id}
               completed={todo.completed}
               value={todo.text}
-              onChange={(event) => {
-                setTodos([
-                  ...todos.slice(0, index),
-                  { ...todo, text: event.target.value },
-                  ...todos.slice(index + 1),
-                ])
-              }}
-              onToggleComplete={() => {
-                setTodos([
-                  ...todos.slice(0, index),
-                  { ...todo, completed: !todo.completed },
-                  ...todos.slice(index + 1),
-                ])
-              }}
+              onChange={(event) => updateTodoAt(index, (t) => ({ ...t, text: event.target.value }))}
               onSave={() => updateExistingTodo(todo.id, todo.text)}
               onDelete={() => deleteExistingTodo(todo.id, index)}
+              onToggleComplete={() =>
+                updateTodoAt(index, (t) => ({ ...t, completed: !t.completed }))
+              }
             />
           ))}
 
@@ -88,34 +90,15 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
               key={`new-${index}`}
               completed={false}
               value={text}
-              onChange={(event) => {
-                setNewTodos([
-                  ...newTodos.slice(0, index),
-                  event.target.value,
-                  ...newTodos.slice(index + 1),
-                ])
-              }}
-              onToggleComplete={() => {}}
-              onSave={() => {
-                if (text.trim()) {
-                  return createNewTodo(text, index)
-                }
-              }}
-              onDelete={async () => {
-                if (text.trim()) {
-                  await createNewTodo(text, index)
-                } else {
-                  setNewTodos([...newTodos.slice(0, index), ...newTodos.slice(index + 1)])
-                }
-              }}
+              onChange={(event) =>
+                setNewTodos((prev) => prev.map((t, i) => (i === index ? event.target.value : t)))
+              }
+              onSave={() => createNewTodo(text, index)}
+              onDelete={() => setNewTodos((prev) => prev.filter((_, i) => i !== index))}
             />
           ))}
 
-          <AddTodoButton
-            onClick={() => {
-              setNewTodos([...newTodos, ''])
-            }}
-          />
+          <AddTodoButton onClick={() => setNewTodos((prev) => [...prev, ''])} />
         </div>
       </CardContent>
     </Card>
@@ -126,9 +109,9 @@ const TodoRow: React.FC<{
   completed: boolean
   value: string
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onToggleComplete: () => void
   onSave: () => Promise<void> | void
   onDelete: () => Promise<void> | void
+  onToggleComplete?: () => void
 }> = ({ completed, value, onChange, onToggleComplete, onSave, onDelete }) => {
   const [isFocused, setIsFocused] = useState(false)
 
@@ -137,7 +120,6 @@ const TodoRow: React.FC<{
       <Checkbox
         sx={{
           margin: '8px',
-
           color: 'gray',
           '&.Mui-checked': {
             color: 'green',
@@ -173,12 +155,10 @@ const TodoRow: React.FC<{
   )
 }
 
-const AddTodoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  return (
-    <CardActions>
-      <Button type='button' color='primary' onClick={onClick}>
-        Add Todo <AddIcon />
-      </Button>
-    </CardActions>
-  )
-}
+const AddTodoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <CardActions>
+    <Button type='button' color='primary' onClick={onClick}>
+      Add Todo <AddIcon />
+    </Button>
+  </CardActions>
+)
