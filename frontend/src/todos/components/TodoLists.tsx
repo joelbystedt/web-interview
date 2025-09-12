@@ -108,7 +108,6 @@ const TodoListActive: React.FC<{ todoLists: TodoList[] }> = ({ todoLists }) => {
       <TodoListForm 
         key={activeList.id} 
         todoList={activeList} 
-        saveTodoList={TodoListService.saveTodoList} 
       />
     </div>
   ) : null

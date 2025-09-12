@@ -29,12 +29,15 @@ export class TodoListService {
     setTodoLists((lists) => lists.filter((list) => list.id !== todoListId))
   }
 
-  static async saveTodoList(id: string, { todos }: { todos: string[] }) {
-    const validTodos = todos.filter(text => text.trim())
-    if (validTodos.length > 0) {
-      for (const text of validTodos) {
-        await api.createTodo(id, text)
-      }
-    }
+  static async createTodo(listId: string, text: string) {
+    return await api.createTodo(listId, text)
+  }
+
+  static async updateTodo(listId: string, todoId: string, text: string) {
+    return await api.updateTodo(listId, todoId, { text })
+  }
+
+  static async deleteTodo(listId: string, todoId: string) {
+    return await api.deleteTodo(listId, todoId)
   }
 }
