@@ -9,8 +9,10 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Button,
 } from '@mui/material'
 import ReceiptIcon from '@mui/icons-material/Receipt'
+import AddIcon from '@mui/icons-material/Add'
 import { api, TodoList } from '../../api'
 import { TodoListForm } from './TodoListForm'
 
@@ -37,16 +39,28 @@ export const TodoLists: React.FC = () => {
     <Fragment>
       <Card>
         <CardContent>
-          <Typography component='h2'>My Todos</Typography>
+          <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
+            <Typography component='h2'>My Todos</Typography>
+            <Button
+              variant='contained'
+              startIcon={<AddIcon />}
+              onClick={async () => {
+                const newList = await api.createTodoList(`New List ${todoLists.length + 1}`)
+                setTodoLists([...todoLists, newList])
+              }}
+            >
+              New List
+            </Button>
+          </Box>
           <List>
             {todoLists.map((todoList) => (
-              <ListItemButton 
-                key={todoList.id} 
+              <ListItemButton
+                key={todoList.id}
                 onClick={() => {
-                  setTodoLists(lists => 
-                    lists.map(list => ({ 
-                      ...list, 
-                      active: list.id === todoList.id 
+                  setTodoLists((lists) =>
+                    lists.map((list) => ({
+                      ...list,
+                      active: list.id === todoList.id,
                     }))
                   )
                 }}
@@ -68,26 +82,7 @@ export const TodoLists: React.FC = () => {
       {(() => {
         const activeList = todoLists.find((list) => list.active)
         return activeList ? (
-          <TodoListForm
-            key={activeList.id}
-            todoList={activeList}
-            saveTodoList={(id, { todos }) => {
-              setTodoLists(lists =>
-                lists.map(list =>
-                  list.id === id ? { 
-                    ...list, 
-                    todos: todos.map((text, index) => ({
-                      id: list.todos[index]?.id || `temp-${index}`,
-                      text,
-                      completed: list.todos[index]?.completed || false,
-                      createdAt: list.todos[index]?.createdAt || new Date().toISOString(),
-                      updatedAt: new Date().toISOString()
-                    }))
-                  } : list
-                )
-              )
-            }}
-          />
+          <TodoListForm key={activeList.id} todoList={activeList} saveTodoList={() => {}} />
         ) : null
       })()}
     </Fragment>
