@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { TodoListStore } from './TodoListStore.js'
 import { CONFIG } from './config.js'
-import todoListRoutes from './routes/todoLists.js'
+import todoListRoutes from './routes.js'
 
 const app = express()
 

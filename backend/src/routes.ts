@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { todoListStore } from '../index.js'
+import { todoListStore } from './index.js'
 
 const router = express.Router()
 
