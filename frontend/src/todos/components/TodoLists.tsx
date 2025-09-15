@@ -80,10 +80,7 @@ const TodoListsContent: React.FC<{
           <ListItemText primary={todoList.name} secondary={`${todoList.todos.length} todos`} />
           <IconButton
             edge='end'
-            onClick={async (e) => {
-              e.stopPropagation()
-              await TodoListService.deleteTodoList(todoList.id, setTodoLists)
-            }}
+            onClick={() => TodoListService.deleteTodoList(todoList.id, setTodoLists)}
           >
             <DeleteIcon />
           </IconButton>

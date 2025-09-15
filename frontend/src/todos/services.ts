@@ -41,6 +41,10 @@ export class TodoListService {
     return await api.updateTodo(listId, todoId, { text })
   }
 
+  static async completeTodo(listId: string, todoId: string, completed: boolean) {
+    return await api.updateTodo(listId, todoId, { completed })
+  }
+
   static async deleteTodo(listId: string, todoId: string) {
     return await api.deleteTodo(listId, todoId)
   }

@@ -57,13 +57,14 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
     })
   }
 
-  const updateExistingTodo = async (todoId: string, text: string) => {
-    await TodoListService.updateTodo(todoList.id, todoId, text)
-  }
-
   const deleteExistingTodo = async (todoId: string, index: number) => {
     await TodoListService.deleteTodo(todoList.id, todoId)
     removeTodoAt(index)
+  }
+
+  const completeExistingTodo = async (todoId: string, index: number, completed: boolean) => {
+    await TodoListService.completeTodo(todoList.id, todoId, completed)
+    updateTodoAt(index, (t) => ({ ...t, completed }))
   }
 
   return (
@@ -77,11 +78,13 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
               completed={todo.completed}
               value={todo.text}
               onChange={(event) => updateTodoAt(index, (t) => ({ ...t, text: event.target.value }))}
-              onSave={() => updateExistingTodo(todo.id, todo.text)}
+              onSave={() => {
+                TodoListService.updateTodo(todoList.id, todo.id, todo.text)
+              }}
               onDelete={() => deleteExistingTodo(todo.id, index)}
-              onToggleComplete={() =>
-                updateTodoAt(index, (t) => ({ ...t, completed: !t.completed }))
-              }
+              onToggleComplete={() => {
+                completeExistingTodo(todo.id, index, !todo.completed)
+              }}
             />
           ))}
 
@@ -108,7 +111,7 @@ export const TodoListForm: React.FC<TodoListFormProps> = ({ todoList, onTodoChan
 const TodoRow: React.FC<{
   completed: boolean
   value: string
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void // TODO: Is this needed?
   onSave: () => Promise<void> | void
   onDelete: () => Promise<void> | void
   onToggleComplete?: () => void
